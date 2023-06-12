@@ -1,0 +1,47 @@
+<?php
+
+namespace DummyNamespace;
+
+use Involveme\Metrics\FunnelMetric;
+use Laravel\Nova\Http\Requests\NovaRequest;
+
+class DummyClass extends FunnelMetric
+{
+    public function ranges(): array
+    {
+        return [
+            30 => __('30 Days'),
+            60 => __('60 Days'),
+            365 => __('365 Days'),
+            'TODAY' => __('Today'),
+            'MTD' => __('Month To Date'),
+            'QTD' => __('Quarter To Date'),
+            'YTD' => __('Year To Date'),
+            'ALL' => __('All Time'),
+        ];
+    }
+
+    /**
+     * Calculate the value of the metric.
+     *
+     * @param  NovaRequest  $request
+     * @return array
+     */
+    public function calculate(NovaRequest $request): array
+    {
+        return [
+            [
+                'name' => 'Step 1',
+                'value' => 100,
+            ],
+            [
+                'name' => 'Step 2',
+                'value' => 50,
+            ],
+            [
+                'name' => 'Step 3',
+                'value' => 25,
+            ],
+        ];
+    }
+}
