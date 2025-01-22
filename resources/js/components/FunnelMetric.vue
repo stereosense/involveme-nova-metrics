@@ -23,7 +23,7 @@
                         <span v-else :title="metricData.tooltip" class="flex-grow">{{ metricData.name }}</span>
                       <div>  
                         <span class="text-sm" title="Compared to previous">{{calculatePercentageTo(idx,idx-1)}}%</span>
-                        <span v-if="idx > 1" class="text-sm" title="Compared to first">&nbsp;/ {{calculatePercentageTo(idx,0)}}%</span>
+                        <span v-if="idx > 1" class="text-sm font-bold" title="Compared to first">&nbsp;/ {{calculatePercentageTo(idx,0)}}%</span>
                       </div>
                     </div>
                 </div>
