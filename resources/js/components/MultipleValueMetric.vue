@@ -17,7 +17,8 @@
             <div v-for="(metricData, idx) in metricsData" :key="idx" class="justify-center text-center">
                 <span class="text-4xl">{{ metricData.value }}</span>
                 <div class="flex flex-col text-center">
-                    <span class="text-base">{{ metricData.name }}</span>
+                    <a v-if="metricData.link" :href="metricData.link" :title="metricData.tooltip" target="_blank" class="link-default">{{ metricData.name }}</a>
+                    <span v-else class="text-base" :title="metricData.tooltip">{{ metricData.name }}</span>
                 </div>
             </div>
         </div>
