@@ -17,7 +17,7 @@
         <div class="flex items-center justify-between px-6">
             <div v-for="(metricData, idx) in metricsData" :key="idx" class="flex space-x-8">
                 <div class="flex items-center space-x-6">
-                    <span class="text-4xl">{{ metricData.value }}</span>
+                    <span class="text-4xl">{{ formatNumber(metricData.value) }}</span>
                     <div class="flex flex-col text-center">
                         <a v-if="metricData.link" :href="metricData.link" :title="metricData.tooltip" target="_blank" class="link-default">{{ metricData.name }}</a>
                         <span v-else class="text-base" :title="metricData.tooltip">{{ metricData.name }}</span>
@@ -90,6 +90,9 @@
                 }
                 return Math.round((this.metricsData[idx].value / this.metricsData[0].value) * 10000) / 100;
             },
+            formatNumber(number) {
+                return new Intl.NumberFormat('us-US', {maximumFractionDigits:0}).format(number);
+            }
         }
     };
 </script>
