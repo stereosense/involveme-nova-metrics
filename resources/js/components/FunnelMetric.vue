@@ -19,8 +19,10 @@
                 <div class="flex items-center space-x-6">
                     <span class="text-4xl">{{ metricData.value }}</span>
                     <div class="flex flex-col text-center">
-                        <span class="text-base">{{ metricData.name }}</span>
-                        <span class="text-sm">{{calculatePercentage(idx)}}%</span>
+                        <a v-if="metricData.link" :href="metricData.link" :title="metricData.tooltip" target="_blank" class="link-default">{{ metricData.name }}</a>
+                        <span v-else class="text-base" :title="metricData.tooltip">{{ metricData.name }}</span>
+                        <span class="text-sm" title="Compared to previous">{{calculatePercentageToPrevious(idx)}}%</span>
+                        <span v-if="![0,1].includes(idx)" class="text-sm" title="Compared to first">/ {{calculatePercentageToFirst(idx)}}%</span>
                     </div>
                 </div>
                 <div v-if="idx !== (metricsData.length - 1)">
@@ -70,8 +72,7 @@
                         console.log('error', error);
                     });
             },
-            calculatePercentage(idx) {
-                //todo refactor to comparison with the first element maybe?
+            calculatePercentageToPrevious(idx) {
                 if(idx === 0) {
                     return 100;
                 }
@@ -79,6 +80,15 @@
                     return 0;
                 }
                 return Math.round((this.metricsData[idx].value / this.metricsData[idx - 1].value) * 10000) / 100;
+            },
+            calculatePercentageToFirst(idx) {
+                if(idx === 0) {
+                    return 100;
+                }
+                if(this.metricsData[0].value === 0) {
+                    return 0;
+                }
+                return Math.round((this.metricsData[idx].value / this.metricsData[0].value) * 10000) / 100;
             },
         }
     };
