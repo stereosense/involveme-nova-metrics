@@ -84,7 +84,7 @@
                 return Math.round((this.metricsData[idx].value / this.metricsData[idy].value) * 10000) / 100;
             },
             formatNumber(number) {
-                return new Intl.NumberFormat('us-US', {maximumFractionDigits: 0}).format(number);
+                return new Intl.NumberFormat('en-US', {maximumFractionDigits: 0}).format(number);
             }
         }
     };
