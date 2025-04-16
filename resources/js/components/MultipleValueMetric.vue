@@ -1,5 +1,5 @@
 <template>
-  <Card class="py-3 im-nova-metrics">
+  <LoadingCard :loading="loading" class="py-3 im-nova-metrics">
     <div class="h-6 flex items-center px-6 mb-4">
       <h3 class="mr-3 leading-tight text-sm font-bold">{{card.name}}</h3>
       <SelectControl
@@ -23,7 +23,7 @@
         </div>
       </div>
     </div>
-  </Card>
+  </LoadingCard>
 </template>
 
 <script>
@@ -36,6 +36,7 @@ export default {
   data: () => ({
     metricsData: [],
     selectedRangeKey: null,
+    loading: true,
   }),
   computed: {
     hasRanges() {
@@ -64,6 +65,7 @@ export default {
     handleFetchCallback() {
       return (response) => {
         this.metricsData = response.data.value;
+        this.loading = false;
       }
     },
   }
