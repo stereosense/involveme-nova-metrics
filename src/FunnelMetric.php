@@ -19,6 +19,13 @@ class FunnelMetric extends RangedMetric
         $range = $request->range;
         $timezone = Nova::resolveUserTimezone($request) ?? $this->getDefaultTimezone($request);
 
+        if ($request->filled('startDate') && $request->filled('endDate')) {
+            return [
+                CarbonImmutable::parse($request->get('startDate'), $timezone)->startOfDay(),
+                CarbonImmutable::parse($request->get('endDate'), $timezone)->endOfDay(),
+            ];
+        }
+
         if ($range === 'TODAY') {
             return [
                 CarbonImmutable::now($timezone)->startOfDay(),
@@ -50,14 +57,8 @@ class FunnelMetric extends RangedMetric
                 CarbonImmutable::now($timezone),
             ];
         }
-        if ($range === 'ALL') {
-            return false;
-        }
 
-        return [
-            CarbonImmutable::now($timezone)->subDays($range),
-            CarbonImmutable::now($timezone),
-        ];
+        return false;
     }
 
     protected function currentQuarterRange($timezone)
