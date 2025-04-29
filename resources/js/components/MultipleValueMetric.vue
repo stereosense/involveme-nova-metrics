@@ -1,18 +1,22 @@
 <template>
   <LoadingCard :loading="loading" class="py-3 im-nova-metrics">
-    <div class="h-6 flex items-center px-6 mb-4">
-      <h3 class="mr-3 leading-tight text-sm font-bold">{{card.name}}</h3>
-      <SelectControl
+    <div class="h-6 flex items-center justify-between px-6 mb-4">
+      <h3 class="mr-3 leading-tight text-sm font-bold">{{ card.name }}</h3>
+      <Datepicker
+          dark
+          :enable-time-picker="false"
           v-if="hasRanges"
-          v-model="selectedRangeKey"
-          :aria-label="__('Select Ranges')"
-          :options="card.ranges"
-          class="ml-auto w-[9rem] flex-shrink-0"
-          size="xxs"
-          @selected="handleRangeSelected"
+          v-model="dateRange"
+          range
+          format="dd/MM/yyyy"
+          :preset-dates="presetValues"
+          :placeholder="__('Custom Range')"
+          class="ml-4 w-[18rem]"
+          style="z-index: 100"
+          teleport
+          @update:modelValue="handleDateRangeSelected"
       />
     </div>
-
 
     <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 gap-2 gap-y-4">
       <div v-for="(metricData, idx) in metricsData" :key="idx" class="justify-center text-center">
@@ -28,46 +32,140 @@
 
 <script>
 import MetricBehavior from '../mixins/MetricBehavior'
+import Datepicker from '@vuepic/vue-datepicker'
+import '@vuepic/vue-datepicker/dist/main.css'
+
 export default {
-  props: [
-    'card',
-  ],
+  props: ['card'],
   mixins: [MetricBehavior],
+  components: {
+    Datepicker,
+  },
   data: () => ({
     metricsData: [],
-    selectedRangeKey: null,
+    startDate: null,
+    endDate: null,
     loading: true,
   }),
   computed: {
+    dateRange: {
+      get() {
+        return this.startDate && this.endDate ? [this.startDate, this.endDate] : null
+      },
+      set(val) {
+        if (Array.isArray(val) && val.length === 2) {
+          this.startDate = val[0]
+          this.endDate = val[1]
+        } else {
+          this.startDate = null
+          this.endDate = null
+        }
+      }
+    },
+    presetValues() {
+      const today = new Date()
+
+      return this.card.ranges
+          .map(({ label, value }) => {
+            let startDate = null
+
+            if (typeof value === 'number') {
+              const start = new Date(today)
+              start.setDate(today.getDate() - value + 1)
+              startDate = start
+            } else {
+              switch (value) {
+                case 'TODAY':
+                  startDate = new Date(today)
+                  break
+                case 'MTD':
+                  startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+                  break
+                case 'QTD': {
+                  const startMonth = Math.floor(today.getMonth() / 3) * 3
+                  startDate = new Date(today.getFullYear(), startMonth, 1)
+                  break
+                }
+                case 'YTD':
+                  startDate = new Date(today.getFullYear(), 0, 1)
+                  break
+                case 'ALL':
+                  startDate = new Date(1900, 0, 1)
+                  break
+              }
+            }
+
+            return startDate ? { label: label, value: [startDate, today] } : null
+          })
+          .filter(Boolean)
+    },
     hasRanges() {
       return this.card.ranges.length > 0;
     },
     metricPayload() {
-      const payload = {
-        params: {
-          timezone: this.userTimezone
-        },
+      const params = {
+        timezone: this.userTimezone,
       }
-      if (this.hasRanges) {
-        payload.params.range = this.selectedRangeKey
+
+      if (this.startDate && this.endDate) {
+        params.startDate = this.startDate.toISOString().split('T')[0]
+        params.endDate = this.endDate.toISOString().split('T')[0]
       }
-      return payload
+
+      return { params }
     },
   },
   created() {
-    if (this.hasRanges) {
-      this.selectedRangeKey =
-          this.card.selectedRangeKey || this.card.ranges[0].value
+    const today = new Date()
+    const firstRange = this.card.ranges[0]
+
+    if (firstRange) {
+      let startDate = null
+
+      if (typeof firstRange.value === 'number') {
+        const start = new Date(today)
+        start.setDate(today.getDate() - firstRange.value + 1)
+        startDate = start
+      } else {
+        switch (firstRange.value) {
+          case 'TODAY':
+            startDate = new Date(today)
+            break
+          case 'MTD':
+            startDate = new Date(today.getFullYear(), today.getMonth(), 1)
+            break
+          case 'QTD': {
+            const startMonth = Math.floor(today.getMonth() / 3) * 3
+            startDate = new Date(today.getFullYear(), startMonth, 1)
+            break
+          }
+          case 'YTD':
+            startDate = new Date(today.getFullYear(), 0, 1)
+            break
+          case 'ALL':
+            startDate = new Date(1900, 0, 1)
+            break
+        }
+      }
+
+      if (startDate) {
+        this.startDate = startDate
+        this.endDate = today
+      }
     }
+
     this.fetch()
   },
   methods: {
+    handleDateRangeSelected() {
+      this.fetch()
+    },
     handleFetchCallback() {
       return (response) => {
-        this.metricsData = response.data.value;
-        this.loading = false;
+        this.metricsData = response.data.value
+        this.loading = false
       }
     },
   }
-};
+}
 </script>
