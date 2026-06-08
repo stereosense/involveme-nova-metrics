@@ -1,6 +1,7 @@
 <template>
   <div class="relative im-nova-metrics">
     <BaseTrendMetric
+      class="h-full"
       :title="card.name"
       :help-text="card.helpText"
       :help-width="card.helpWidth"
