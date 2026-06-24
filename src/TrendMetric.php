@@ -55,9 +55,17 @@ class TrendMetric extends Trend
     protected function getAggregateStartingDate(NovaRequest $request, string $unit, ?string $timezone): CarbonInterface
     {
         if ($request->filled('startDate') && $request->filled('endDate')) {
-            $this->custom_ending_date = CarbonImmutable::parse($request->input('endDate'), $timezone)->endOfDay();
+            $start = CarbonImmutable::parse($request->input('startDate'), $timezone)->startOfDay();
+            $end = CarbonImmutable::parse($request->input('endDate'), $timezone)->endOfDay();
 
-            return CarbonImmutable::parse($request->input('startDate'), $timezone)->startOfDay();
+            if ($unit === self::BY_WEEKS) {
+                $start = $start->startOfWeek();
+                $end = $end->endOfWeek();
+            }
+
+            $this->custom_ending_date = $end;
+
+            return $start;
         }
 
         $this->custom_ending_date = null;
